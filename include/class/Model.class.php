@@ -12,9 +12,12 @@ class Model
 //         $this->registry['sample'] = 'sample_1_01';
     }
     private function connect() {
-        $user = 'strength';
-        $pwd = 'Fdx%Y5_KNz2rbS$9qnr';
-        $db_name = 'strength';
+//        $user = 'strength';
+//        $pwd = 'Fdx%Y5_KNz2rbS$9qnr';
+//        $db_name = 'strength';
+        $user = 'id14072386_user';
+        $pwd = ')Uu34su6yb&krkF(';
+        $db_name = 'id14072386_data';
         try {
             $this->db = new PDO('mysql:host=localhost;dbname=' . $db_name, $user, $pwd);
         } catch (PDOException $e) {
@@ -69,7 +72,7 @@ class Model
             }
         }
         foreach($clearing as $key => $reason) {
-            if ($reason < 1e-4) {
+            if ($reason < 1e-6) {
                 unset($out[$key]);
             }
         }
@@ -96,7 +99,7 @@ class Model
                 $out[$el] = $value;
             }
         }
-        $this->registry['compound'] = $out;
+        $this->registry['compound'] = array_slice($out, 3);
     }
 
     public function tables() {

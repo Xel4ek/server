@@ -7,8 +7,8 @@ Class Controller_table Extends Controller_base {
     function show() {
         $model = $this->registry['model'];
         $out = $model->table();
-        echo json_encode($out);
         $model->compound();
+        echo json_encode($out);
 //        var_dump($model);
     }
     function  all() {

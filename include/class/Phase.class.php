@@ -40,11 +40,11 @@ class Phase
         $table = array(
             'fields' => array(
                 array('name'=>'element', 'title' => 'Элемент'), 
-                array('name'=> 'atom', 'title' => 'ат. %'),
+                array('name'=> 'atom', 'title' => 'вес. %'),
 //                 array('name'=>'diffusion', 'title' => 'D, м<sup>2</sup>с<sup>-1</sup>')
             ),
          );
-        foreach ($this->composition_a as $el => $c){
+        foreach ($this->composition_w as $el => $c){
 //             $diffusion = new Diffusion($el, $this->matrix);
 //             $D = $diffusion->asString($T);
             $table['data'][] = array('element'=> $el, 'atom'=>round($c * 100, 3));
