@@ -3,10 +3,13 @@
 
 class Martensite extends Alloy
 {
-    protected $dislocation_density = 5 * 1e14;
+    protected $dislocation_density = 4e15;
     protected $sigma020 = 50;
     protected $hall_petch;
-    protected $dis_param = ['alpha' => 0.25, 'M' => 3, 'G' => 8.0e4, 'b' => 2.5e-10, 'scale' => .01];
+    protected $props = ['M' => 3, 'G' => 8.0e4, 'b' => 2.5e-10];
+    protected $dis_param = ['alpha' => 0.25];
+    protected $precipitation_param = ['F' => 1.25];
+
     protected $solid_hardening = [
         'Mn' => 540,
         'Cr' => 622,
@@ -15,8 +18,9 @@ class Martensite extends Alloy
         'Mo' => 2362,
         'V' => 2362,
         'Ti' => 2628,
-        'Al' => 19,
+        'Al' => 196,
     ];
+    protected $particle_per_dis = 7;
     function __construct($registry)
     {
         parent::__construct($registry);

@@ -29,8 +29,13 @@ abstract class Alloy
     protected $sigma020;
     protected $d = 30; // microns
     protected $hall_petch;
-    protected $dis_param = ['alpha' => 0, 'M' => 0, 'G' => 0, 'b' => 0, 'scale' => 0];
+    protected $props = ['M' => 0, 'G' => 0, 'b' => 0];
+    protected $dis_param = ['alpha' => 0];
+    protected $dislocation_prop = ['B' => 22, 'tau' => 1];
+    protected $precipitation_param = ['F' => 1.25];
     protected $solid_hardening;
+    protected $particle_per_dis = 1;
+
     public function __construct($registry)
     {
         $this->registry = $registry;
@@ -115,10 +120,18 @@ abstract class Alloy
     private function charts($max_time = 2e6) {
 //        $compound = $this->matrix_compound();
         $time = range(0, $max_time, $max_time / 21);
+        $hardening_p_f = $this->precipitation_hardening();
+        $hardening_dis_f = $this->dislocation_hardening();
         $out = array();
         foreach ($time as $t) {
-            $hardening = $this->solid_hardening($t);
-            $out['solid'][] = ['y' => $hardening, 'x' => $t / 3600];
+            $hardening_s = $this->solid_hardening($t);
+            $hardening_p = $hardening_p_f($t);
+            $hardening_dis = $hardening_dis_f($t);
+            $ct = $t / 3600;
+            $out['solid'][] = ['y' => $hardening_s, 'x' => $ct];
+            $out['precipitation'][] = ['y' => $hardening_p, 'x' => $ct];
+            $out['dislocation'][] = ['y' => $hardening_dis, 'x' => $ct];
+            $out['total'] [] = ['y' => $hardening_dis + $hardening_p + $hardening_s + $this->gb_herdness() + $this->sigma020, 'x' => $ct];
         }
         return $out;
 //        return $this->compound;
@@ -154,6 +167,25 @@ abstract class Alloy
             return $source;
         };
     }
+    protected function precipitation_hardening() {
+        $count = 0;
+        foreach ($this->carbide as $carbide) {
+            $name = $carbide->name;
+            $count += $this->get_particle_count($name);
+//            $radius[$name] = $carbide->radius($this->matrix, $this->T)['get'];
+        }
+        $lambda = $count ** (-1/3) ;
+        $prop = array_product($this->props) * array_product($this->precipitation_param);
+        return function ($t) use ($lambda, $prop) {
+            $res = 0;
+            foreach ($this->radius as $r) {
+                $diff = $lambda - 2 * $r($t);
+                $res += 0.85 * $prop / (2 * pi() * $diff) * log($diff / $this->props['b'] );
+            }
+            return $res;
+        };
+    }
+
     public function carbide($carbide_name, $max_time, $min_time = 0, $steps = 42){
         $step = ($max_time - $min_time) / $steps;
         $data = array();
@@ -225,7 +257,7 @@ abstract class Alloy
         if(!$density) {
             throw new Exception('$density undefined');
         }
-        $particle_count = pow($density, 3 / 2);
+        $particle_count = pow($density, 3 / 2) / $this->particle_per_dis;
         if(preg_match('/M23|M6/', $phase)){
             return $particle_count / 100;
         }
@@ -286,9 +318,21 @@ abstract class Alloy
 //        echo "total $total_volume";
 //        var_dump($this->composition);
     }
-
+    protected function dislocation_hardening(){
+        return function ($t) {
+            return array_product($this->dis_param) * array_product($this->props) * ($this->dislocation_count($t));
+        };
+    }
+    protected function dislocation_count($t){
+        $density = $this->dislocation_density;
+        $coef = (1 - $this->dislocation_prop['B'] * log(1 + $t / $this->dislocation_prop['tau']));
+        if ($coef < 1/100) {
+            $coef = .1;
+        }
+        return $density ** (1/2) * $coef;
+    }
     public function dis_herdness()
     {
-        return array_product($this->dis_param) * ($this->dislocation_density ** (1/2));
+        return array_product($this->dis_param) * array_product($this->props) * ($this->dislocation_density ** (1/2));
     }
 }
