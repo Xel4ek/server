@@ -47,32 +47,6 @@ abstract class Alloy
 //        $this->composition = $this->registry['model']->composition();
     }
     public function test() {
-//        var_dump($this->get_matrix());
-//        var_dump(array_keys($this->composition));
-//        $this->get_matrix();
-//        $this->get_carbide();
-//        foreach ($this->carbide as $carbide){
-//            $carbide->get_critical_time($this->matrix, $this->T);
-//            echo '<br/>';
-//        }
-//        $test = $this->carbide[0]->radius($this->matrix, $this->T);
-//        var_dump($test(81278));
-//        $this->carbide();
-//        var_dump($test(2225.2293957823));
-//        var_dump($this->matrix);
-//        var_dump($this->carbide);
-//        var_dump($this->phases);
-//        $this->active_phase();
-//        $carbide = $this->carbide['CEMENTITE'];
-//        var_dump($carbide->atom);
-//        foreach ($carbide->atom as $el => $value){
-//            $dif = new Diffusion($el, NUll);
-//            echo "$el {$dif->value(500)} ";
-//        }
-
-//        foreach ($this->carbide as $carbide){
-//            $carbide->control_flow($this->T);
-//        }
     }
     public function gb_herdness(){
         return $this->hall_petch * pow($this->d , -1/2);
@@ -118,7 +92,6 @@ abstract class Alloy
         return $info;
     }
     private function charts($max_time = 2e6) {
-//        $compound = $this->matrix_compound();
         $time = range(0, $max_time, $max_time / 21);
         $hardening_p_f = $this->precipitation_hardening();
         $hardening_dis_f = $this->dislocation_hardening();
@@ -134,7 +107,6 @@ abstract class Alloy
             $out['total'] [] = ['y' => $hardening_dis + $hardening_p + $hardening_s + $this->gb_herdness() + $this->sigma020, 'x' => $ct];
         }
         return $out;
-//        return $this->compound;
     }
     protected function solid_hardening($t) {
         $compound = $this->matrix_compound();
@@ -144,7 +116,6 @@ abstract class Alloy
                 $hardening += $weight * 100 * $this->solid_hardening[$el];
             }
         }
-//        $hardening = $compound($t)['Fe'];
         return $hardening;
     }
     protected function matrix_compound($type = 'weight'){
@@ -172,7 +143,6 @@ abstract class Alloy
         foreach ($this->carbide as $carbide) {
             $name = $carbide->name;
             $count += $this->get_particle_count($name);
-//            $radius[$name] = $carbide->radius($this->matrix, $this->T)['get'];
         }
         $lambda = $count ** (-1/3) ;
         $prop = array_product($this->props) * array_product($this->precipitation_param);
@@ -190,19 +160,16 @@ abstract class Alloy
         $step = ($max_time - $min_time) / $steps;
         $data = array();
         $time = range($min_time, $max_time, $step);
-//        echo 'BPW_' . $carbide_name . ' alloy';
         $precision = $step < 3600 ? ceil(-log10($step / 3600)) + 1 : 1;
         foreach ($time as $t){
             $data['time'][] = round($t / 3600, $precision);
         }
-//        foreach ($this->carbide as $carbide){
             $carbide = $this->carbide['BPW_' . $carbide_name];
             $carbide_info = $carbide->radius($this->matrix, $this->T);
             $func = $carbide_info['get'];
             foreach ($time as $t){
                 $data[$carbide->name][] = $func($t) * 1e9;
             }
-//        }
         return $data;
     }
     public function critical_time(){
@@ -225,13 +192,9 @@ abstract class Alloy
             }
         }
         $this->matrix = $this->phase( $matrix );
-//        $this->matrix[$matrix] = $this->composition[$matrix];
     }
     private function phase($key){
         $phase = join('_', array_slice(explode('_', $key), 1));
-//        echo "$phase ";
-//        var_dump(explode('_', $key));
-//        var_dump($this->composition);
         $fields = array_filter(array_keys($this->composition), function ($key) use ($phase) {
             return preg_match("/^W_$phase/", $key) & 1;
         });
@@ -242,7 +205,6 @@ abstract class Alloy
             $el = ucfirst(strtolower($code[$index]));
             $composition[$el] = $this->composition[$field];
         }
-//        echo "$phase ";
         return new Phase($phase, $this->phases[$key], $composition);
     }
     private function get_carbide(){
@@ -266,28 +228,6 @@ abstract class Alloy
     private function avg($rhs, $lhs, $shoulder, $diff){
         return $rhs + ($lhs - $rhs) / $diff * $shoulder;
     }
-//    private function  start_compound(){
-//        $compound = $this->matrix->atom;
-//        $name = $this->matrix->name;
-//        array_walk($compound, function (&$value) use ($name) {
-//            $value = $this->phases['BPW_' . $name]['volume'];
-//        });
-//        foreach ($this->carbide as $carbide){
-//            $cc = $carbide->atom;
-//            $name = $carbide->name;
-//            array_walk($cc, function (&$value) use ($name) {
-//                $value = $this->phases['BPW_' . $name]['volume'];
-//            });
-//            foreach ($compound as $el => &$c) {
-//                if (isset($cc[$el])) {
-//                    $c += $cc[$el];
-//                }
-//            }
-//        }
-//        $this->compound = $compound;
-//        $this->compound = $this->registry['compound'];
-//    }
-
 
     private function get_composition($data){
         $index = count($data) - 1;
@@ -313,10 +253,6 @@ abstract class Alloy
         foreach ($this->phases as &$value){
            $value['volume'] /= $total_volume;
         }
-//         public function hardness();
-//        var_dump($this->phases);
-//        echo "total $total_volume";
-//        var_dump($this->composition);
     }
     protected function dislocation_hardening(){
         return function ($t) {
