@@ -8,7 +8,6 @@ class Martensite extends Alloy
     protected $hall_petch;
     protected $props = ['M' => 3, 'G' => 8.0e4, 'b' => 2.5e-10];
     protected $dis_param = ['alpha' => 0.25];
-    protected $precipitation_param = ['F' => 1.25];
 
     protected $solid_hardening = [
         'Mn' => 540,
@@ -34,7 +33,6 @@ class Martensite extends Alloy
                 $hardening += $mole * $this->solid_hardening[$el] ** 2;
             }
         }
-//        $hardening = $compound($t)['Fe'];
         return $hardening ** (1/2);
     }
 }

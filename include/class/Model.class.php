@@ -132,4 +132,8 @@ class Model
         return $sth->fetchAll(PDO::FETCH_ASSOC);
 //        var_dump($out);
     }
+    public function interpolated_composition() {
+        $composition = $this->registry['composition'];
+        return $composition;
+    }
 }

@@ -33,7 +33,7 @@ abstract class Alloy
     protected $dis_param = ['alpha' => 0];
     protected $dislocation_prop = ['B' => 22, 'tau' => 1];
     protected $precipitation_param = ['F' => 1.25];
-    protected $solid_hardening;
+//    protected $solid_hardening;
     protected $particle_per_dis = 1;
 
     public function __construct($registry)
@@ -98,7 +98,7 @@ abstract class Alloy
         $out = array();
         foreach ($time as $t) {
             $hardening_s = $this->solid_hardening($t);
-            $hardening_p = $hardening_p_f($t);
+            $hardening_p = 0;//$hardening_p_f($t);
             $hardening_dis = $hardening_dis_f($t);
             $ct = $t / 3600;
             $out['solid'][] = ['y' => $hardening_s, 'x' => $ct];
@@ -132,6 +132,7 @@ abstract class Alloy
                     $cc = $compound[$name];
                     if (isset($cc[$el])) {
                         $c -= $cc[$el] * 4 / 3 * $carbide_radius($t) ** 3 * $this->get_particle_count($name) * pi();
+                        $c = $c < 0 ? 0 : $c;
                     }
                 }
             }

@@ -14,7 +14,9 @@ class Diffusion
         'V' => array('D' => .00034,'E' => 22100),
         'Fe' => array('D' => 0.118, 'E' => 281500),
         'Ni' => array('D' => .00014, 'E' => 245800),
-        'Mn' => array('D'=> .00016, 'E' => 224500));
+        'Mn' => array('D'=> .00016, 'E' => 224500),
+        'Cu' => array('D'=> .00016, 'E' => 224500), //fix it
+        'Si' => array('D'=> .00016, 'E' => 224500)); //fix it
     const R = 8.314;
     function __construct($el, Phase $matrix)
     {
