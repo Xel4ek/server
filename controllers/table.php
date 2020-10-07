@@ -32,25 +32,26 @@ class Controller_table extends Controller_base
 
     function element_list()
     {
-        $moack = array(
-            'Fe' => [
-                'name' => 'Fe',
-                'maxValue' => 100,
-                'value' => 100,
-                'active' => false
-            ],
-            'Co' => [
-                'name' => 'Co',
-                'maxValue' => 1.2,
-                'value' => 0,
-            ],
-            'Ni' => [
-                'name' => 'Ni',
-                'maxValue' => 5.2,
-                'value' => 0,
-            ]
-        );
-        echo json_encode($moack);
+//        $moack = array(
+//            'Fe' => [
+//                'name' => 'Fe',
+//                'maxValue' => 100,
+//                'value' => 100,
+//                'active' => false
+//            ],
+//            'Co' => [
+//                'name' => 'Co',
+//                'maxValue' => 1.2,
+//                'value' => 0,
+//            ],
+//            'Ni' => [
+//                'name' => 'Ni',
+//                'maxValue' => 5.2,
+//                'value' => 0,
+//            ]
+//        );
+        $list = $this->registry['model']->element_range();
+        echo json_encode($list);
     }
 
 }
