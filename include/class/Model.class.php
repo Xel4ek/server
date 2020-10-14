@@ -149,7 +149,7 @@ class Model
 
     public function interpolated_composition()
     {
-        $composition = $this->registry['composition'];
+        $composition = ['composition' => $this->registry['compound'], 'type' => $this->registry['steal_type']];
         return $composition;
     }
 
@@ -160,14 +160,15 @@ class Model
         $sth = $this->db->prepare("
             SELECT `element_name`, `min_value`, `max_value` 
             FROM `steal_info` 
-            WHERE `steal_name` = '" . $steal_type . "'");
+            WHERE `steal_name` = '" . $steal_type . "'
+            ORDER BY `element_name`");
         $sth->execute();
 
         $this->db = null;
         $res = array();
         foreach ($sth->fetchAll(PDO::FETCH_ASSOC) as $entry) {
             $res[$entry['element_name']] = $entry;
-            $res[$entry['element_name']]['value'] = $entry['min_value'];
+//            $res[$entry['element_name']]['value'] = $entry['min_value'];
         }
         return $res;
     }
