@@ -14,16 +14,20 @@ class Steal
         '5' => 'Upper_bainite',
         '6' => 'Lower_bainite',
     );
+    private $compound;
+    private $T;
     public function __construct($registry)
     {
         $this->registry = $registry;
         $this->registry['steal'] = $this;
         $alloys = $this->registry['structure_types'];
-//        $this->registry['T'] = 680;
+        $composition = new Composition($this->registry);
+        $this->compound = $composition->approximate();
         foreach ($alloys as $alloy){
             $registry = $this->registry;
             $struct_id = $alloy['id'];
             $class = $this->structures[$struct_id];
+            $this->T = $this->registry['T'];
             $compound = new $class($registry);
             $this->alloys[] = array(
                  'name' => $alloy['name_en'],
@@ -31,7 +35,6 @@ class Steal
                 'compound' => $compound
             );
         }
-        $this->registry['steal'] = $this;
     }
     public function get_optimal_time(){
         $data = array();
@@ -77,24 +80,7 @@ class Steal
         }
         return $out;
     }
-    public function cr_ni_eq(){
-        $c = $this->registry['compound'];
-        $cr_eq = (isset($c['Cr']) ? $c['Cr'] : 0)
-            + 0 * (isset($c['Si']) ? $c['Si'] : 0)
-            + 0 * (isset($c['Mo']) ? $c['Mo'] : 0)
-            + 0 * (isset($c['Al']) ? $c['Al'] : 0)
-            + 0.7 * (isset($c['Nb']) ? $c['Nb'] : 0)
-            + 0 * (isset($c['Ti']) ? $c['Ti'] : 0)
-            + 0 * (isset($c['W']) ? $c['W'] : 0)
-            + 0 * (isset($c['V']) ? $c['V'] : 0);
-
-        $ni_eq = (isset($c['Ni']) ? $c['Ni'] : 0)
-            + 0 * (isset($c['Mn']) ? $c['Mn'] : 0)
-            + 35 * (isset($c['C']) ? $c['C'] : 0)
-            + 20 * (isset($c['N']) ? $c['N'] : 0)
-            + 0 * (isset($c['Cu']) ? $c['Cu'] : 0)
-            + 0 * (isset($c['Co']) ? $c['Co'] : 0);
-//        return $c;
-        return array('Cr'=>$cr_eq * 100, 'Ni' => $ni_eq * 100);
+    public function compound(){
+        return $this->compound;
     }
 }

@@ -15,7 +15,8 @@ abstract class Alloy
         'BPW_LIQUID' => 7.64922,
         'BPW_M23C6' => 7.61925,
         'BPW_M7C3' => 7.04718,
-        'BPW_MC_SHP' => 5.64761
+        'BPW_MC_SHP' => 5.64761,
+        'BPW_MX' => 7.64922,
     );
     private $registry;
     private $composition;
@@ -34,47 +35,21 @@ abstract class Alloy
     protected $dislocation_prop = ['B' => 22, 'tau' => 1];
     protected $precipitation_param = ['F' => 1.25];
     protected $solid_hardening;
-    protected $particle_per_dis = 1;
+    protected $particle_per_dis = 8;
 
     public function __construct($registry)
     {
         $this->registry = $registry;
         $this->T = $registry['T'];
-        $this->get_composition($this->registry['model']->composition($this->T));
+//        $this->get_composition($this->registry['model']->composition($this->T));
+        $this->get_composition($this->registry['steal']->compound());
         $this->get_matrix();
         $this->get_carbide();
         $this->compound = $this->registry['compound'];
 //        $this->composition = $this->registry['model']->composition();
     }
-    public function test() {
-//        var_dump($this->get_matrix());
-//        var_dump(array_keys($this->composition));
-//        $this->get_matrix();
-//        $this->get_carbide();
-//        foreach ($this->carbide as $carbide){
-//            $carbide->get_critical_time($this->matrix, $this->T);
-//            echo '<br/>';
-//        }
-//        $test = $this->carbide[0]->radius($this->matrix, $this->T);
-//        var_dump($test(81278));
-//        $this->carbide();
-//        var_dump($test(2225.2293957823));
-//        var_dump($this->matrix);
-//        var_dump($this->carbide);
-//        var_dump($this->phases);
-//        $this->active_phase();
-//        $carbide = $this->carbide['CEMENTITE'];
-//        var_dump($carbide->atom);
-//        foreach ($carbide->atom as $el => $value){
-//            $dif = new Diffusion($el, NUll);
-//            echo "$el {$dif->value(500)} ";
-//        }
 
-//        foreach ($this->carbide as $carbide){
-//            $carbide->control_flow($this->T);
-//        }
-    }
-    public function gb_herdness(){
+    public function gb_hardness(){
         return $this->hall_petch * pow($this->d , -1/2);
     }
     private function toScientific($num, $prec = 2) {
@@ -112,8 +87,8 @@ abstract class Alloy
         $info['composition']['data'][] = ['phase' => $matrix->name, 'value' => round($this->phases["BPW_{$matrix->name}"]['volume'] * 100, 3)];
         $info['matrix'][$matrix->name]['props']['data'] = $prop;
         $info['props']['data'][] =  ['prop' => 'Условный предел текучести, σ<sub>0,2</sub>' , 'value'=> round($this->sigma020, 2) . " МПа"];
-        $info['props']['data'][] =  ['prop' => 'Зернограничное упрочнение' , 'value'=> round($this->gb_herdness(),2) . " МПа"];
-        $info['props']['data'][] =  ['prop' => 'Дислокационное упрочнение' , 'value'=> round($this->dis_herdness(),2) . " МПа"];
+        $info['props']['data'][] =  ['prop' => 'Зернограничное упрочнение' , 'value'=> round($this->gb_hardness(),2) . " МПа"];
+        $info['props']['data'][] =  ['prop' => 'Дислокационное упрочнение' , 'value'=> round($this->dis_hardness(),2) . " МПа"];
         $info['chart']['data'] = $this->charts();
         return $info;
     }
@@ -131,7 +106,7 @@ abstract class Alloy
             $out['solid'][] = ['y' => $hardening_s, 'x' => $ct];
             $out['precipitation'][] = ['y' => $hardening_p, 'x' => $ct];
             $out['dislocation'][] = ['y' => $hardening_dis, 'x' => $ct];
-            $out['total'] [] = ['y' => $hardening_dis + $hardening_p + $hardening_s + $this->gb_herdness() + $this->sigma020, 'x' => $ct];
+            $out['total'] [] = ['y' => $hardening_dis + $hardening_p + $hardening_s + $this->gb_hardness() + $this->sigma020, 'x' => $ct];
         }
         return $out;
 //        return $this->compound;
@@ -259,13 +234,13 @@ abstract class Alloy
         }
         $particle_count = pow($density, 3 / 2) / $this->particle_per_dis;
         if(preg_match('/M23|M6/', $phase)){
-            return $particle_count / 100;
+            return $particle_count / 12.5;
         }
         return $particle_count;
     }
-    private function avg($rhs, $lhs, $shoulder, $diff){
-        return $rhs + ($lhs - $rhs) / $diff * $shoulder;
-    }
+//    private function avg($rhs, $lhs, $shoulder, $diff){
+//        return $rhs + ($lhs - $rhs) / $diff * $shoulder;
+//    }
 //    private function  start_compound(){
 //        $compound = $this->matrix->atom;
 //        $name = $this->matrix->name;
@@ -290,24 +265,18 @@ abstract class Alloy
 
 
     private function get_composition($data){
-        $index = count($data) - 1;
-        $rhs = +$data[$index - 1]['T'];
-        $lhs = +$data[$index]['T'];
-        $diff = $lhs - $rhs;
-        $shoulder = $this->T - $rhs;
         $total_volume = 0;
 
         $this->composition = array();
-        foreach ($data[$index - 1] as $field => $value){
-            $avg = $this->avg($value, $data[$index][$field], $shoulder, $diff);
-            if ($avg != 0) {
-                $this->composition[$field] = $avg;
+        foreach ($data as $field => $value){
+//            if ($value != 0) {
+                $this->composition[$field] = $value;
                 if (preg_match("/^BPW_/", $field)){
-                    $volume = $avg / $this->density[$field];
+                    $volume = $value / $this->density[$field];
                     $total_volume += $volume;
-                    $this->phases[$field] = ['weight' => $avg, 'volume' => $volume];
+                    $this->phases[$field] = ['weight' => $value, 'volume' => $volume];
                     $this->phases[$field]['particle_count'] = $this->get_particle_count($field);
-                }
+//                }
             }
         }
         foreach ($this->phases as &$value){
@@ -325,13 +294,13 @@ abstract class Alloy
     }
     protected function dislocation_count($t){
         $density = $this->dislocation_density;
-        $coef = (1 - $this->dislocation_prop['B'] * log(1 + $t / $this->dislocation_prop['tau']));
-        if ($coef < 1/100) {
-            $coef = .1;
+        $coif = (1 - $this->dislocation_prop['B'] * log(1 + $t / $this->dislocation_prop['tau']));
+        if ($coif < 1/100) {
+            $coif = .1;
         }
-        return $density ** (1/2) * $coef;
+        return $density ** (1/2) * $coif;
     }
-    public function dis_herdness()
+    public function dis_hardness()
     {
         return array_product($this->dis_param) * array_product($this->props) * ($this->dislocation_density ** (1/2));
     }

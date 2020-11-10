@@ -5,12 +5,13 @@ class Model
 {
     private $registry;
     private $db;
-
+    private  $user = 'id14072386_user';
+    private $pwd = ')Uu34su6yb&krkF(';
+    private $db_name = 'id14072386_data';
     public function __construct($registry)
     {
         $this->registry = $registry;
         $this->registry['model'] = $this;
-//         $this->registry['sample'] = 'sample_1_01';
     }
 
     private function connect()
@@ -18,11 +19,11 @@ class Model
 //        $user = 'strength';
 //        $pwd = 'Fdx%Y5_KNz2rbS$9qnr';
 //        $db_name = 'strength';
-        $user = 'id14072386_user';
-        $pwd = ')Uu34su6yb&krkF(';
-        $db_name = 'id14072386_data';
+//        $user = 'id14072386_user';
+//        $pwd = ')Uu34su6yb&krkF(';
+//        $db_name = 'id14072386_data_1';
         try {
-            $this->db = new PDO('mysql:host=localhost;dbname=' . $db_name, $user, $pwd);
+            $this->db = new PDO('mysql:host=localhost;dbname=' . $this->db_name, $this->user, $this->pwd);
         } catch (PDOException $e) {
             die('Подключение не удалось: ' . $e->getMessage());
         }
@@ -52,7 +53,9 @@ class Model
         $this->connect();
         $sth = $this->db->prepare("SELECT `COLUMN_NAME`
           FROM `INFORMATION_SCHEMA`.`COLUMNS`
-          WHERE `TABLE_NAME`='" . $table . "' AND `COLUMN_NAME` LIKE '$query%'");
+          WHERE `TABLE_SCHEMA`='$this->db_name' AND 
+          `TABLE_NAME`='$table' 
+          AND `COLUMN_NAME` LIKE '$query%'");
         $sth->execute();
         $needle = array();
         foreach ($sth->fetchAll() as $field) {
@@ -60,10 +63,12 @@ class Model
                 $needle[] = $field[0];
             }
         }
+//        var_dump($needle);
         $sth = $this->db->prepare("SELECT `T`, " . join(', ', $needle) . " 
             FROM `$table`
             WHERE `T` > " . $min . " AND" . " `T` < " . $max);
         $sth->execute();
+//        var_dump($sth->errorInfo());
         $out = array();
         $clearing = array();
         while (($row = $sth->fetch(PDO::FETCH_ASSOC)) != false) {
@@ -86,13 +91,18 @@ class Model
             }
         }
         $this->db = null;
+
         return $out;
     }
 
     public function compound()
     {
-        $this->connect();
         $table = $this->registry['sample'];
+        $this->registry['compound'] =$this->get_coumpound_by_name($table);
+    }
+
+    private function get_coumpound_by_name($table){
+        $this->connect();
         $sth = $this->db->prepare("SELECT *
           FROM `$table`
           WHERE `T` = IFNULL((
@@ -103,16 +113,15 @@ class Model
         $this->db = null;
         $out = array();
         foreach ($sth->fetch(PDO::FETCH_ASSOC) as $key => $value) {
-            if ($value) {
+            if ($value != 0) {
                 $code = explode('_', $key);
                 $index = count($code) - 1;
                 $el = ucfirst(strtolower($code[$index]));
                 $out[$el] = $value;
             }
         }
-        $this->registry['compound'] = array_slice($out, 3);
+        return array_slice($out, 3);
     }
-
     public function tables()
     {
         $this->connect();
@@ -128,9 +137,16 @@ class Model
 
     public function composition()
     {
+        $table = $this->registry['sample'];
+        return $this->get_composition_by_name($table);
+    }
+    private function avg($rhs, $lhs, $shoulder, $diff){
+        return $rhs + ($lhs - $rhs) / $diff * $shoulder;
+    }
+
+    public function get_composition_by_name($table) {
         $T = $this->registry['T'];
         $this->connect();
-        $table = $this->registry['sample'];
         $sth = $this->db->prepare("
             SELECT * FROM `$table`
             WHERE (
@@ -143,14 +159,46 @@ class Model
             ");
         $sth->execute();
         $this->db = null;
-        return $sth->fetchAll(PDO::FETCH_ASSOC);
-//        var_dump($out);
+        $data = $sth->fetchAll(PDO::FETCH_ASSOC);
+            $index = count($data) - 1;
+            $rhs = +$data[$index - 1]['T'];
+            $lhs = +$data[$index]['T'];
+            $diff = $lhs - $rhs;
+            $shoulder = $T - $rhs;
+            $composition = array();
+            foreach ($data[$index - 1] as $field => $value){
+                $avg = $this->avg($value, $data[$index][$field], $shoulder, $diff);
+                if ($avg != 0) {
+                    $composition[$field] = $avg;
+                }
+            }
+            return $composition;
     }
 
-    public function interpolated_composition()
+    public function compounds_list()
     {
-        $composition = ['composition' => $this->registry['compound'], 'type' => $this->registry['steal_type']];
-        return $composition;
+//        $composition = ['composition' => $this->registry['compound'], 'type' => $this->registry['steal_type']];
+        $samples = $this->get_samples_names();
+        $compounds = array();
+        foreach ($samples as $sample) {
+            $compounds[$sample] = $this->get_coumpound_by_name($sample);
+        }
+        return $compounds;
+    }
+    private function get_samples_names() {
+        $steal_type = $this->registry['steal_type'];
+        $this->connect();
+        $sth = $this->db->prepare("
+            SELECT `table_id` 
+            FROM `tables` 
+            WHERE `name` = '" . $steal_type . "'");
+        $sth->execute();
+        $this->db = null;
+        $res = array();
+        foreach ($sth->fetchAll() as $entry) {
+            $res[] = $entry['table_id'];
+        }
+        return $res;
     }
 
     public function element_range()
@@ -168,7 +216,6 @@ class Model
         $res = array();
         foreach ($sth->fetchAll(PDO::FETCH_ASSOC) as $entry) {
             $res[$entry['element_name']] = $entry;
-//            $res[$entry['element_name']]['value'] = $entry['min_value'];
         }
         return $res;
     }

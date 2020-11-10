@@ -3,7 +3,7 @@
 
 class Martensite extends Alloy
 {
-    protected $dislocation_density = 4e15;
+    protected $dislocation_density = 3.5e15;
     protected $sigma020 = 50;
     protected $hall_petch;
     protected $props = ['M' => 3, 'G' => 8.0e4, 'b' => 2.5e-10];
