@@ -16,12 +16,6 @@ class Model
 
     private function connect()
     {
-//        $user = 'strength';
-//        $pwd = 'Fdx%Y5_KNz2rbS$9qnr';
-//        $db_name = 'strength';
-//        $user = 'id14072386_user';
-//        $pwd = ')Uu34su6yb&krkF(';
-//        $db_name = 'id14072386_data_1';
         try {
             $this->db = new PDO('mysql:host=localhost;dbname=' . $this->db_name, $this->user, $this->pwd);
         } catch (PDOException $e) {
