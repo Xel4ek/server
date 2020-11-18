@@ -92,7 +92,7 @@ abstract class Alloy
         $info['chart']['data'] = $this->charts();
         return $info;
     }
-    private function charts($max_time = 2e6) {
+    private function charts($max_time = 2e5) {
 //        $compound = $this->matrix_compound();
         $time = range(0, $max_time, $max_time / 21);
         $hardening_p_f = $this->precipitation_hardening();
