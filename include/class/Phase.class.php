@@ -32,28 +32,28 @@ class Phase
         $this->set_composition($composition);
         $this->get_radius();
     }
-//     public function info(Phase $matrix, $T){
-//         $table= array();
-//         return $this->composition_table($matrix, $T);
-//     }
+
+    /*
+     * Информация фазе
+     * */
     public function info($T){
         $table = array(
             'fields' => array(
                 array('name'=>'element', 'title' => 'Элемент'), 
                 array('name'=> 'atom', 'title' => 'вес. %'),
-//                 array('name'=>'diffusion', 'title' => 'D, м<sup>2</sup>с<sup>-1</sup>')
             ),
          );
         foreach ($this->composition_w as $el => $c){
-//             $diffusion = new Diffusion($el, $this->matrix);
-//             $D = $diffusion->asString($T);
             $table['data'][] = array('element'=> $el, 'atom'=>round($c * 100, 3));
         }
         $prop = array();
         $prop['fields'] = [['name'=>'prop', 'title' => 'Свойство'], ['name' => 'value', 'title' => 'Значение']];
-//         $prop['data'] = 
         return ['composition' => $table, 'props' => $prop];
     }
+    /*
+     * Информация фазе в понимании карбида
+     * */
+
     public function carbides_info($T){
         $info = $this->info($T);
         $prop = &$info['props']['data'];
@@ -62,11 +62,17 @@ class Phase
         $prop[] = ['prop' => 'Критическое время' , 'value'=> "$time"];
         return $info;
     }
+    /*
+     * Расчет радиуса карбида
+     * */
     private function get_radius(){
         $count = $this->share['particle_count'];
         $volume = $this->share['volume'];
         $this->critical_radius = pow($volume / $count * 3 / 4 / pi(), 1 / 3);
     }
+    /*
+     * Установкак состава фазы
+     * */
     private function set_composition($composition){
         $this->composition_w = $composition;
         $sum = 0;
@@ -78,8 +84,10 @@ class Phase
         foreach ($this->composition_a as $key => $value){
            $this->composition_a[$key] = $value / $sum;
         }
-//        var_dump($composition);
     }
+    /*
+     * Расчет радиуса карбида
+     * */
     public function radius(Phase $matrix, $T){
         $this->get_critical_time($matrix, $T);
         $data = $this->control;
@@ -90,7 +98,6 @@ class Phase
         return array(
             'control' => $this->control,
             'get' => function ($time) use ($data) {
-//            var_dump($data);
                 return sqrt(2 * $data['D'] *
                     ($data['c'] * $data['volume']) /
                     ($data['c']  - $data['matrix']->atom[$data['element']]) *
@@ -98,6 +105,11 @@ class Phase
             }
         );
     }
+
+    /*
+     * Расчет критического времяни
+     * */
+
     public function  get_critical_time(Phase $matrix, $T)
     {
         $composition = $this->composition_a;
@@ -114,17 +126,9 @@ class Phase
                 }
             }
         }
-//        var_dump($m);
-//        var_dump($control);
-//        echo $control['time'] / 3600;
-//        var_dump($this->critical_radius);
-//        echo '<br/>';
-//        var_dump($composition);
-//        echo '<br/>';
         if($this->time < $control['time']){
             $this->time = $control['time'];
         }
-
         $this->control = $control;
     }
 

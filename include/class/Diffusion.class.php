@@ -25,6 +25,7 @@ class Diffusion
         $this->D = isset($this->diffusionDb[$el]['D']) ? $this->diffusionDb[$el]['D'] : 0;
         $this->E = isset($this->diffusionDb[$el]['E']) ? $this->diffusionDb[$el]['E'] : 0;
     }
+
     public function value($T){
         return $this->D * exp(-$this->E / (Diffusion::R * ($T + 273.18)));
     }

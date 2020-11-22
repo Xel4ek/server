@@ -9,8 +9,8 @@ class Controller_sample extends Controller_base
 
     public function info()
     {
-        if (isset($this->registry['steal'])) {
-            $info = $this->registry['steal']->info();
+        if (isset($this->registry['steel'])) {
+            $info = $this->registry['steel']->info();
             echo json_encode($info);
         } else {
             echo '{}';

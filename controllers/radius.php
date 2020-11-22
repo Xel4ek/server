@@ -14,21 +14,8 @@ class Controller_radius extends Controller_base
 //        echo json_encode($data);
     }
     public function carbide(){
-//        $postData = file_get_contents('php://input');
-//        $data = json_decode($postData, true);
-//        $this->registry['T'] = $data['T'];
-//        $this->registry['structure_types'] = $data['struct'];
-//        $steal = new Steal($this->registry);
-//        var_dump($this->registry);
-//        var_dump($steal->radius());
-
-        $steal = $this->registry['steal'];
-//        var_dump($steal);
-//        var_dump($steal->get_optimal_time());
-        echo json_encode($steal->radius());
-//         var_dump( $this->registry['sample']);
-//         var_dump($data);
-//         var_dump($this->registry);
+        $steel = $this->registry['steel'];
+        echo json_encode($steel->radius());
     }
     public function test(){
         $postData = file_get_contents('php://input');
@@ -36,10 +23,10 @@ class Controller_radius extends Controller_base
 //         $this->registry['sample'] = $data['id'];
         $this->registry['T'] = $data['T'];
         $this->registry['structure_types'] = $data['struct'];
-        $steal = new Steal($this->registry);
+        $steel = new Steel($this->registry);
 //        var_dump($this->registry);
-//        var_dump($steal->radius());
-        echo json_encode($steal->radius());
+//        var_dump($steel->radius());
+        echo json_encode($steel->radius());
 //         var_dump( $this->registry['sample']);
 //         var_dump($data);
 //         var_dump($this->registry);

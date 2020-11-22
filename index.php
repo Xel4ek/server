@@ -14,8 +14,8 @@ if(!function_exists('classAutoLoader')){
         if(is_file($classFile)&&!class_exists($class)) include $classFile;
     }
 }
-
 spl_autoload_register('classAutoLoader');
+
 header("Access-Control-Allow-Origin: http://localhost:8080");
 header('Access-Control-Allow-Credentials: true');
 session_start();

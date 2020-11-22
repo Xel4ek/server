@@ -1,7 +1,7 @@
 <?php
 
 
-class Steal
+class Steel
 {
     private $registry;
     private $alloys;
@@ -19,7 +19,7 @@ class Steal
     public function __construct($registry)
     {
         $this->registry = $registry;
-        $this->registry['steal'] = $this;
+        $this->registry['steel'] = $this;
         $alloys = $this->registry['structure_types'];
         $composition = new Composition($this->registry);
         $this->compound = $composition->approximate();
@@ -36,6 +36,10 @@ class Steal
             );
         }
     }
+
+    /*
+     * Расчет оптимального времяни
+     * */
     public function get_optimal_time(){
         $data = array();
         foreach ($this->alloys as $alloy){
@@ -48,6 +52,10 @@ class Steal
         }
         $this->critical_times = $data;
     }
+
+    /*
+     * Формарования информации о стали
+     * */
     public function info(){
         $info = array();
         $prop['fields'] = [['name'=>'prop', 'title' => 'Свойство'], ['name' => 'value', 'title' => 'Значение']];
@@ -56,14 +64,16 @@ class Steal
             $name = $alloy['name'];
             $info[$name] = $phase->info();
             $info[$name]['props'] += $prop;
-//             $info[$name]['props']['data'][] =  ['prop' => 'Условный предел текучести, σ<sub>0,2</sub>' , 'value'=> $this->sigma020 . " МПа"];
             $info[$name]['props']['data'][] =  ['prop' => 'Относительное удлинение, δ' , 'value'=> 0.2];
             $info[$name]['props']['data'][] =  ['prop' => 'Относительное сужение, ψ' , 'value'=> 0.5];
             $info[$name]['props']['data'][] =  ['prop' => 'Критическая температура хрупкости, T<sub>K<sub>0</sub></sub>' , 'value'=> 0.5];
-//             $info[$name]['composition']['fields'] = [['name'=>'phase', 'title' => 'Фаза'], ['name' => 'value', 'title' => 'об. %']];
         }
         return $info;
     }
+
+    /*
+     * Расчет размеров карбидов для оптимального времяни
+     * */
     public function radius(){
         $this->get_optimal_time();
         $out = array();
@@ -80,6 +90,10 @@ class Steal
         }
         return $out;
     }
+
+    /*
+     * Состав стали
+     * */
     public function compound(){
         return $this->compound;
     }
