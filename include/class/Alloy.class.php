@@ -57,7 +57,8 @@ abstract class Alloy
     /*
      * Приведение к представлению для отправки
      * */
-    private function toScientific($num, $prec = 2) {
+    private function toScientific($num, $prec = 2): string
+    {
         $data = explode('E', sprintf("%0." . $prec . "E",$num));
         $exp = str_replace('+', '', $data[1]);
         return $data[0] == 0 ? '---' : $data[0] . '⋅10<sup>' . $exp . '</sup>';
@@ -66,7 +67,8 @@ abstract class Alloy
     /*
      * Информация о макроструктурной составляющей для использования в интерфейсе
      * */
-    public function info(){
+    public function info(): array
+    {
         $info = array();
         $info['composition']['fields'] = [['name'=>'phase', 'title' => 'Фаза'], ['name' => 'value', 'title' => 'об. %']];
         $carbides = $this->carbide;
@@ -104,7 +106,8 @@ abstract class Alloy
     /*
      * Информация о зависимости упрочнения от времяни для использования в интерфейсе
      * */
-    private function charts($max_time = 2e5) {
+    private function charts($max_time = 2e5): array
+    {
         $time = range(0, $max_time, $max_time / 21);
         $hardening_p_f = $this->precipitation_hardening();
         $hardening_dis_f = $this->dislocation_hardening();
@@ -139,7 +142,8 @@ abstract class Alloy
     /*
      * Расчет состава матрицы
      * */
-    protected function matrix_compound($type = 'weight'){
+    protected function matrix_compound($type = 'weight'): Closure
+    {
         $compound = array();
         foreach ($this->carbide as $name => $carbide) {
             $carbide_info = $carbide->radius($this->matrix, $this->T);
@@ -163,7 +167,8 @@ abstract class Alloy
     /*
      * Расчет дисперсионного упрочнения
      * */
-    protected function precipitation_hardening() {
+    protected function precipitation_hardening(): Closure
+    {
         $count = 0;
         foreach ($this->carbide as $carbide) {
             $name = $carbide->name;
@@ -184,10 +189,18 @@ abstract class Alloy
     /*
      * Расчет размера карбида от времени
      * */
-    public function carbide($carbide_name, $max_time, $min_time = 0, $steps = 42){
+    public function carbide($carbide_name, $max_time, $min_time = 0, $steps = 42): array
+    {
         $step = ($max_time - $min_time) / $steps;
         $data = array();
         $time = range($min_time, $max_time, $step);
+        /*
+         * temp changing
+         * */
+//        $time = [0, 2 * 3600, 4 * 3600, 8 * 3600, 16 * 3600, 32 * 3600, 64 * 3600 ];
+        /*
+         * end temp changing
+         * */
         $precision = $step < 3600 ? ceil(-log10($step / 3600)) + 1 : 1;
         foreach ($time as $t){
             $data['time'][] = round($t / 3600, $precision);
@@ -204,7 +217,8 @@ abstract class Alloy
     /*
      * Расчет критического времяни
      * */
-    public function critical_time(){
+    public function critical_time(): array
+    {
         $time = array();
         foreach ($this->carbide as $carbide){
             $carbide_info = $carbide->radius($this->matrix, $this->T);
@@ -233,7 +247,8 @@ abstract class Alloy
     /*
      * Опредение карбидов
      * */
-    private function phase($key){
+    private function phase($key): Phase
+    {
         $phase = join('_', array_slice(explode('_', $key), 1));
         $fields = array_filter(array_keys($this->composition), function ($key) use ($phase) {
             return preg_match("/^W_$phase/", $key) & 1;
@@ -267,8 +282,8 @@ abstract class Alloy
             throw new Exception('$density undefined');
         }
         $particle_count = pow($density, 3 / 2) / $this->particle_per_dis;
-        if(preg_match('/M23|M6/', $phase)){
-            return $particle_count / 12.5;
+        if(preg_match('/M\d+/', $phase)){
+            return $particle_count / 10;
         }
         return $particle_count;
     }
@@ -295,7 +310,8 @@ abstract class Alloy
     /*
      * Расчет дислокационного упрочнения
      * */
-    protected function dislocation_hardening(){
+    protected function dislocation_hardening(): Closure
+    {
         return function ($t) {
             return array_product($this->dis_param) * array_product($this->props) * ($this->dislocation_count($t));
         };
