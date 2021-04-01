@@ -32,8 +32,8 @@ class Controller_composition extends Controller_base
         $this->registry['T'] = $data['T'];
 //        $this->registry['T'] = 680;
 //        $res = $this->registry['steel']->cr_ni_eq();
-        $this->registry['structure_types'] = ['id'=> '6', 'name_ru' => '123', 'name_en' => 456, 'value'=>100];
-        if(!isset($this->registry['steel'])) {
+//        $this->registry['structure_types'] = ['id'=> '6', 'name_ru' => '123', 'name_en' => 456, 'value'=>100];
+        if (!isset($this->registry['steel'])) {
             new Steel($this->registry);
         }
 //        var_dump($this->registry['steel']);

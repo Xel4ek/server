@@ -13,6 +13,9 @@ class Model
     {
         $this->registry = $registry;
         $this->registry['model'] = $this;
+        if (!property_exists($registry, 'dislocations')) {
+            $this->registry['dislocations'] = [];
+        }
     }
 
     /*
@@ -200,6 +203,7 @@ class Model
         }
         return $compounds;
     }
+
     /*
      * Получение списка заранее загруженных составов для выбранной марки стали
      * */

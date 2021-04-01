@@ -1,17 +1,18 @@
 <?php
-define ('DIRSEP', DIRECTORY_SEPARATOR);
-define('DIR', __DIR__ );
-if(!function_exists('classAutoLoader')){
-    function classAutoLoader($class){
+define('DIRSEP', DIRECTORY_SEPARATOR);
+define('DIR', __DIR__);
+if (!function_exists('classAutoLoader')) {
+    function classAutoLoader($class)
+    {
 //         $classFile = $_SERVER['DOCUMENT_ROOT'].
-            $classFile = DIR .
-            DIRSEP.
-            'include'.
+        $classFile = DIR .
             DIRSEP .
-            'class'.
-            DIRSEP.
-            $class.'.class.php';
-        if(is_file($classFile)&&!class_exists($class)) include $classFile;
+            'include' .
+            DIRSEP .
+            'class' .
+            DIRSEP .
+            $class . '.class.php';
+        if (is_file($classFile) && !class_exists($class)) include $classFile;
     }
 }
 spl_autoload_register('classAutoLoader');
@@ -25,8 +26,8 @@ if (isset($_SESSION['registry'])) {
 } else {
     $registry = new Registry;
     $router = new Router($registry);
-    $registry['router'] =  $router;
-    $router->setPath (DIRSEP . 'controllers');
+    $registry['router'] = $router;
+    $router->setPath(DIRSEP . 'controllers');
     $model = new Model($registry);
     $_SESSION['registry'] = $registry;
 }

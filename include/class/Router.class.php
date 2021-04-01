@@ -6,10 +6,14 @@ class Router
     private $registry;
     private $path;
     private $args = array();
-    function __construct($registry) {
+
+    function __construct($registry)
+    {
         $this->registry = $registry;
     }
-    function setPath($path) {
+
+    function setPath($path)
+    {
         $path = trim($path, '/\\');
         $path = DIR . DIRSEP . $path;
         if (is_dir($path) == false) {
@@ -17,12 +21,13 @@ class Router
         }
         $this->path = $path;
     }
+
     function delegate()
     {
         $this->getController($file, $controller, $action, $args);
-//        var_dump( $args);
+//        var_dump($args);
         $options = array();
-        if(!empty($args)) {
+        if (!empty($args)) {
             foreach ($args as $entry) {
                 $arg = explode('=', $entry);
                 $options[$arg[0]] = $arg[1];
@@ -32,7 +37,7 @@ class Router
         if (is_readable($file) == false) {
             die ('404 Not Found');
         }
-        include ($file);
+        include($file);
         $class = 'Controller_' . $controller;
         $controller = new $class($this->registry);
         if (is_callable(array($controller, $action)) == false) {
@@ -40,9 +45,13 @@ class Router
         }
         $controller->$action();
     }
-    private function getController(&$file, &$controller, &$action, &$args) {
+
+    private function getController(&$file, &$controller, &$action, &$args)
+    {
         $route = (empty($_GET['route'])) ? '' : $_GET['route'];
-        if (empty($route)) { $route = 'index'; }
+        if (empty($route)) {
+            $route = 'index';
+        }
         $route = trim($route, '/\\');
         $parts = explode('/', $route);
         $cmd_path = $this->path . DIRSEP;
@@ -59,9 +68,13 @@ class Router
                 break;
             }
         }
-        if (empty($controller)) { $controller = 'index'; };
+        if (empty($controller)) {
+            $controller = 'index';
+        };
         $action = array_shift($parts);
-        if (empty($action)) { $action = 'index'; }
+        if (empty($action)) {
+            $action = 'index';
+        }
         $file = $cmd_path . $controller . '.php';
         $args = $parts;
     }
